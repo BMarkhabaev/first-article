@@ -1,0 +1,17 @@
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage[russian]{babel}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathreplacing,fit,backgrounds}
+% палитра (dataviz, светлая тема)
+\definecolor{cblue}{HTML}{2A78D6}\definecolor{corange}{HTML}{EB6834}\definecolor{caqua}{HTML}{1BAF7A}
+\definecolor{cyellow}{HTML}{EDA100}\definecolor{ink}{HTML}{0B0B0B}\definecolor{ink2}{HTML}{52514E}
+\definecolor{grid}{HTML}{E4E3DF}\definecolor{paper}{HTML}{FCFCFB}
+\tikzset{
+  >={Stealth[length=2mm]},
+  blk/.style={draw=ink2, rounded corners=2pt, minimum height=6mm, minimum width=11mm, font=\footnotesize, fill=white},
+  orig/.style={blk, fill=grid!60},
+  repl/.style={blk, draw=corange, fill=corange!12, line width=0.7pt},
+  plus/.style={circle, draw=ink2, inner sep=0.6pt, font=\scriptsize, fill=white},
+  note/.style={font=\scriptsize, text=ink2, align=center},
+}

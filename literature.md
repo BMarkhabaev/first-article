@@ -1,4 +1,4 @@
-25 источников для научной статьи:
+29 источников для научной статьи:
 
 1) A Mathematical Framework for Transformer Circuits, Nelson Elhage et al. https://transformer-circuits.pub/2021/framework/index.html
 2) Attention Is All You Need, Ashish Vaswani et al., https://arxiv.org/abs/1706.03762
@@ -41,3 +41,23 @@
 24) Towards Monosemanticity: Decomposing Language Models With Dictionary Learning, Trenton Bricken et al., https://transformer-circuits.pub/2023/monosemantic-features/index.html
 
 25) A Practical Review of Mechanistic Interpretability for Transformer-Based Language Models, Daking Rai et al., https://arxiv.org/abs/2407.02646
+
+26) ASVD: Activation-aware Singular Value Decomposition for Compressing Large Language Models, Zhihang Yuan et al., https://arxiv.org/abs/2312.05821
+
+27) SVD-LLM: Truncation-aware Singular Value Decomposition for Large Language Model Compression, Xin Wang et al., https://arxiv.org/abs/2403.07378
+
+28) Deja Vu: Contextual Sparsity for Efficient LLMs at Inference Time, Zichang Liu et al., https://arxiv.org/abs/2310.17157
+
+29) MoEfication: Transformer Feed-forward Layers are Mixtures of Experts, Zhengyan Zhang et al., https://arxiv.org/abs/2110.01786
+
+30) CATS: Contextually-Aware Thresholding for Sparsity in Large Language Models, Je-Yong Lee et al., https://arxiv.org/abs/2404.08763
+
+31) Training-Free Activation Sparsity in Large Language Models (TEAL), James Liu et al., https://arxiv.org/abs/2408.14690
+
+32) ReplaceMe: Network Simplification via Depth Pruning and Transformer Block Linearization, Dmitriy Shopkhoev et al., NeurIPS 2025, https://arxiv.org/abs/2505.02819
+
+33) Ghosted Layers: Unconstrained Activation Alignment for Recovering Layer-Pruned LLMs, Vincent-Daniel Yun et al., ICML 2026, https://arxiv.org/abs/2605.15491
+
+34) The Super Weight in Large Language Models, Mengxia Yu et al., https://arxiv.org/abs/2411.07191
+
+35) Massive Activations in Large Language Models, Mingjie Sun et al., https://arxiv.org/abs/2402.17762

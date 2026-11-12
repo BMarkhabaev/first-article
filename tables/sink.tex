@@ -1,0 +1,9 @@
+\begin{tabular}{lcccrrrr}
+\toprule
+Модель & слой & нейронов & доля вклада в поз.~0 & \multicolumn{2}{c}{удалить везде} & удалить при $t\ge1$ & случайные \\
+ & & & & $\Delta$PPL & $\|h_0\|$ после слоя & $\Delta$PPL & $\Delta$PPL \\
+\midrule
+Qwen3-0.6B & 2 & 5 & 90\% & +54.4\% & 429 & +0.3\% & -0.0\% \\
+Qwen3-1.7B & 2 & 1 & 94\% & +230.9\% & 225 & +0.0\% & -0.0\% \\
+\bottomrule
+\end{tabular}

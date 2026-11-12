@@ -1,0 +1,54 @@
+% Один слайд 16:9 с главным результатом статьи. Сборка: tectonic -X compile slide.tex (из папки brief).
+\documentclass[10pt]{article}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage[russian]{babel}
+\usepackage{amsmath}
+\usepackage[paperwidth=25.4cm,paperheight=14.29cm,margin=0.7cm,top=0.5cm,bottom=0.4cm]{geometry}
+\usepackage{graphicx,xcolor,enumitem}
+\setlist{nosep,leftmargin=1.1em,itemsep=0.3em}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+\definecolor{corange}{HTML}{EB6834}\definecolor{cblue}{HTML}{2A78D6}\definecolor{ink2}{HTML}{52514E}
+\input{brief_numbers}
+\begin{document}
+\selectlanguage{russian}
+{\LARGE\bfseries Детерминированная замена первых слоёв LLM: что можно, что нельзя и почему}\\[0.1em]
+{\small\color{ink2} Qwen3-0.6B, Qwen3-1.7B и SmolLM2-1.7B. Замены первых $k$ слоёв строятся по явным формулам из весов и 128 тыс. токенов калибровки, без обучения и случайности. Данные: WikiText-103 (калибровка), WikiText-2 и 7 бенчмарков (оценка).}
+
+\vspace{0.1em}
+\begin{center}
+\includegraphics[width=0.52\linewidth]{figs/arch_A.pdf}\\[-0.1em]
+{\footnotesize\color{ink2} Первые $k$ слоёв: внимание "--- окно 64 токена + стоки, MLP "--- 25\,\% нейронов по линейному предиктору (M-O4); остальные слои не меняются.}
+\end{center}
+
+\vspace{0.2em}
+\noindent\begin{minipage}[t]{0.63\linewidth}
+\vspace{0pt}\centering
+\includegraphics[width=\linewidth,height=5.3cm,keepaspectratio]{fig_howmany_slide.pdf}\\[-0.1em]
+{\footnotesize\color{ink2} Рост perplexity на WikiText-2 от числа заменённых слоёв $k$ (пунктир "--- пороги 2 и 5\,\%).}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.355\linewidth}
+\vspace{0pt}\small
+\begin{itemize}
+  \item \textbf{Внимание заменяется почти даром:} окно 64 + сток "--- \kTwoWin{} слоя при росте PPL $\le 2\,\%$,
+    \kFiveWin{} слоёв при $\le 5\,\%$; бенчмарки без изменений, KV-кэш до \kvFiveWin{} меньше.
+  \item \textbf{MLP первых слоёв незаменим:} лучший предиктор 25\,\% нейронов стоит \dpplRoutedKThree{} (0.6B)
+    и \dpplRoutedBKThree{} (1.7B) при $k=3$; поправки плотные и высокоранговые.
+  \item \textbf{Второе семейство (SmolLM2-1.7B):} сток привязан к токену «\,the\,» (нейрон 4987 слоя~1),
+    а не к позиции; защита нейронов стока: $123 \to 11\,\%$; окно с массивными ключами при $k=8$:
+    $64 \to 4.4\,\%$ без потерь на бенчмарках. MLP первых слоёв здесь дороже.
+\end{itemize}
+
+\vspace{0.3em}
+{\footnotesize\color{ink2}
+\textbf{Остаточный поток} "--- вектор каждого токена, идущий сквозь все слои; каждый слой читает его и
+\emph{прибавляет} свою поправку.\\
+\textbf{Сток внимания} "--- токен, на который остальные сбрасывают лишний вес внимания, когда «смотреть не на что»;
+без него вес размазывается по случайным токенам и модель ломается, поэтому замена обязана сохранять сток и
+нейроны, которые его создают.\\
+\textbf{Детерминированная замена} "--- модуль, построенный по явной формуле из весов и калибровочного текста,
+без обучения и случайности.\par}
+
+\end{minipage}
+\end{document}
