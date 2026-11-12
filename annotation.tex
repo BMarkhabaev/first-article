@@ -1,0 +1,43 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{iftex}
+\usepackage{amsmath,amssymb}
+\ifPDFTeX
+  \usepackage[T2A]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  % XeLaTeX / LuaLaTeX (в т.ч. tectonic): Unicode-шрифт с кириллицей
+  \usepackage{fontspec}
+  \setmainfont{cmunrm.otf}[BoldFont=cmunbx.otf, ItalicFont=cmunti.otf,
+    BoldItalicFont=cmunbi.otf]
+\fi
+\usepackage[russian,english]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+
+% Меньше вылезающих за поле строк с длинными латинскими терминами
+\setlength{\emergencystretch}{2em}
+
+% Пометки для черновика
+
+\title{Детерминированные алгоритмы аппроксимации первых слоёв LLM}
+\author{Чанкаев Шамиль, Мархабаев Бекет}
+\date{}
+
+\begin{document}
+\selectlanguage{russian}
+\maketitle
+
+% =====================================================================
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+% =====================================================================
+\input{sections/intro}
+
+% =====================================================================
+\input{references}
+
+\end{document}

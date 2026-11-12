@@ -1,0 +1,38 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{iftex}
+\usepackage{amsmath,amssymb}
+\ifPDFTeX
+  \usepackage[T2A]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  % XeLaTeX / LuaLaTeX (в т.ч. tectonic): Unicode-шрифт с кириллицей
+  \usepackage{fontspec}
+  \setmainfont{cmunrm.otf}[BoldFont=cmunbx.otf, ItalicFont=cmunti.otf,
+    BoldItalicFont=cmunbi.otf]
+\fi
+\usepackage[russian,english]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+
+\setlength{\emergencystretch}{2em}
+\newcommand{\RWsection}{\section}
+\newcommand{\RWsubsection}{\subsection}
+
+\title{Обзор литературы\\[0.3em]
+\large к статье <<Детерминированные алгоритмы аппроксимации первых слоёв LLM>>}
+\author{}
+\date{}
+
+\begin{document}
+\selectlanguage{russian}
+\maketitle
+
+\input{sections/related}
+
+\input{references}
+
+\end{document}

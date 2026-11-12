@@ -1,0 +1,54 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{iftex}
+\usepackage{amsthm}
+\usepackage{amsmath,amssymb}
+\ifPDFTeX
+  \usepackage[T2A]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  % XeLaTeX / LuaLaTeX (в т.ч. tectonic): Unicode-шрифт с кириллицей
+  \usepackage{fontspec}
+  \setmainfont{Times New Roman}
+\fi
+\usepackage[russian,english]{babel}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+
+\setlength{\emergencystretch}{2em}
+% обзор литературы — один раздел с подразделами
+\newcommand{\RWsection}{\subsection}
+\newcommand{\RWsubsection}{\subsubsection}
+
+\title{Детерминированные алгоритмы аппроксимации первых слоёв LLM}
+\author{Чанкаев Шамиль, Мархабаев Бекет}
+\date{}
+
+\begin{document}
+\selectlanguage{russian}
+\maketitle
+
+\begin{abstract}
+\newtheorem{proposition}{Предложение}
+\input{sections/abstract}
+\end{abstract}
+
+\input{sections/intro}
+
+\section{Обзор литературы}\label{sec:related}
+\input{sections/related}
+
+\input{sections/methods}
+\input{sections/experiments}
+\input{sections/results}
+\input{sections/propagation}
+\input{sections/criterion}
+\input{sections/discussion}
+
+\input{references}
+
+\end{document}

@@ -1,0 +1,27 @@
+\documentclass[border=4pt]{standalone}
+\input{preamble}
+\begin{document}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \draw[line width=2.2pt, cblue!70] (0,0) -- (15.4,0);
+  \node[note, anchor=east] at (-0.1,0) {токены\\$\to$ эмбеддинг};
+  \draw[->, line width=2.2pt, cblue!70] (15.4,0) -- (16.0,0) node[note, right] {прогноз\\следующего\\токена};
+  \node[font=\scriptsize\itshape, text=cblue, anchor=south west] at (0.05,0.08) {остаточный поток};
+  % \x — левая граница слоя; внимание сверху, MLP снизу
+  \foreach \i/\x/\st/\a/\m in {0/1.0/repl/{окно}/{MLP 25\%}, 1/4.6/repl/{окно}/{MLP 25\%}, 2/8.2/repl/{окно}/{MLP 25\%}, 27/12.6/orig/{внимание}/{MLP}}{
+    \node[\st, minimum width=13mm] (a\i) at (\x+0.95,1.05) {\a};
+    \node[\st, minimum width=13mm] (m\i) at (\x+2.15,-1.05) {\m};
+    \node[plus] (pa\i) at (\x+1.9,0) {$+$};
+    \node[plus] (pm\i) at (\x+3.1,0) {$+$};
+    \draw[->, ink2] (\x,0) |- (a\i.west);
+    \draw[->, ink2] (a\i.east) -| (pa\i.north);
+    \draw[->, ink2] (\x+1.2,0) |- (m\i.west);
+    \draw[->, ink2] (m\i.east) -| (pm\i.south);
+    \node[note] at (\x+1.55,1.72) {слой \i};
+  }
+  \node[font=\large, text=ink2] at (12.0,0.45) {$\cdots$};
+  \draw[decorate, decoration={brace, amplitude=5pt, mirror}, corange] (0.9,-1.6) -- (11.4,-1.6)
+    node[midway, below=5pt, note, text=corange] {первые $k$ слоёв: явные алгоритмы, построенные из весов готовой модели};
+  \draw[decorate, decoration={brace, amplitude=5pt, mirror}, ink2] (12.5,-1.6) -- (15.8,-1.6)
+    node[midway, below=5pt, note] {остальные слои\\без изменений};
+\end{tikzpicture}
+\end{document}

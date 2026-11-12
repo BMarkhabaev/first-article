@@ -1,0 +1,26 @@
+\documentclass[border=4pt]{standalone}
+\input{preamble}
+\begin{document}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \foreach \X/\title/\st/\att/\attd/\mlp/\mlpd in {
+      0/{Исходный слой}/orig/{Внимание}/{смотрит на все\\предыдущие токены}/{MLP}/{все 3072 нейрона},
+      7.0/{Заменённый слой}/repl/{Окно внимания}/{только 64 последних\\токена + первый}/{MLP: κ нейронов}/{нейроны выбирает\\линейный предиктор;\\остаток — линейная карта}}{
+    \begin{scope}[shift={(\X,0)}]
+      \draw[line width=2pt, cblue!70, ->] (0,-0.2) -- (0,5.4);
+      \node[note, below] at (0,-0.2) {вход};
+      \node[note, above] at (0,5.4) {выход};
+      \node[font=\small\bfseries, anchor=south] at (1.6,5.75) {\title};
+      \node[\st, minimum width=24mm, minimum height=8mm] (a) at (1.9,1.4) {\att};
+      \node[\st, minimum width=24mm, minimum height=8mm] (m) at (1.9,3.8) {\mlp};
+      \node[plus] (p1) at (0,2.1) {$+$};
+      \node[plus] (p2) at (0,4.5) {$+$};
+      \draw[->, ink2] (0,0.7) -| (a.south);
+      \draw[->, ink2] (a.north) |- (p1.east);
+      \draw[->, ink2] (0,3.1) -| (m.south);
+      \draw[->, ink2] (m.north) |- (p2.east);
+      \node[note, anchor=west, align=left] at (3.25,1.4) {\attd};
+      \node[note, anchor=west, align=left] at (3.25,3.8) {\mlpd};
+    \end{scope}}
+  \draw[->, corange, line width=1pt] (5.9,2.6) -- (6.7,2.6);
+\end{tikzpicture}
+\end{document}

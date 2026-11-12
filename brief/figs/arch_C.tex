@@ -1,0 +1,34 @@
+\documentclass[border=4pt]{standalone}
+\input{preamble}
+\begin{document}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \def\N{12}\def\s{0.22}
+  % полное каузальное внимание
+  \begin{scope}[shift={(0,0)}]
+    \node[font=\small\bfseries, anchor=south west] at (0,\N*\s+0.15) {Внимание: исходное};
+    \foreach \t in {0,...,11}{\foreach \j in {0,...,\t}{
+      \fill[cblue!55] (\j*\s,{(\N-1-\t)*\s}) rectangle ++(\s*0.9,\s*0.9);}}
+    \node[note, anchor=north] at (\N*\s/2,-0.1) {каждый токен (строка) смотрит\\на все предыдущие (столбцы)};
+  \end{scope}
+  % окно + сток
+  \begin{scope}[shift={(3.6,0)}]
+    \node[font=\small\bfseries, anchor=south west] at (0,\N*\s+0.15) {Замена: окно + сток};
+    \foreach \t in {0,...,11}{\foreach \j in {0,...,\t}{
+      \pgfmathtruncatemacro{\d}{\t-\j}
+      \ifnum\d<3 \fill[corange!70] (\j*\s,{(\N-1-\t)*\s}) rectangle ++(\s*0.9,\s*0.9);
+      \else\ifnum\j=0 \fill[corange!70] (\j*\s,{(\N-1-\t)*\s}) rectangle ++(\s*0.9,\s*0.9);
+      \else \fill[grid] (\j*\s,{(\N-1-\t)*\s}) rectangle ++(\s*0.9,\s*0.9);\fi\fi}}
+    \node[note, anchor=north] at (\N*\s/2,-0.1) {только ближайшие токены\\и первый (сток)};
+  \end{scope}
+  % нейроны MLP
+  \begin{scope}[shift={(7.4,0.4)}]
+    \node[font=\small\bfseries, anchor=south west] at (0,2.35) {MLP: какие нейроны считать};
+    \foreach \r/\lab/\pat in {1.6/{исходный}/{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, 0.6/{замена}/{0,1,0,0,1,0,0,0,1,0,0,1,0,0,0,0}}{
+      \node[note, anchor=east] at (-0.1,\r+0.12) {\lab};
+      \foreach \v [count=\c from 0] in \pat {
+        \ifnum\v=1 \fill[\ifdim\r pt>1pt cblue!55\else corange!70\fi] (\c*0.24,\r) rectangle ++(0.2,0.24);
+        \else \fill[grid] (\c*0.24,\r) rectangle ++(0.2,0.24);\fi}}
+    \node[note, anchor=north west, align=left] at (0,0.45) {для каждого токена предиктор выбирает\\25\% нейронов; остаток — линейная поправка};
+  \end{scope}
+\end{tikzpicture}
+\end{document}
