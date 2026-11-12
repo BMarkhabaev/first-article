@@ -1,5 +1,5 @@
 # В репозиторий идут: текст статьи (main.tex, sections/, references.tex, tables/, figures/), записка и слайд (brief/),
-# код экспериментов (experiments/*.py, detlayers/, tools/, *.sh, requirements, README, PLAN). Всё остальное — нет.
+# код экспериментов (experiments/*.py, detlayers/, tools/, *.sh, requirements, README). Всё остальное — нет; notes/ — локальные заметки.
 
 # Python
 __pycache__/
@@ -44,3 +44,6 @@ ideas.md
 literature.md
 brief/brief_2p_backup.tex
 brief/figure_options.*
+
+# Локальные заметки (TODO и черновики)
+notes/
