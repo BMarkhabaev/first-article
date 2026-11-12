@@ -774,3 +774,9 @@ TODO статья: все эти результаты внести (propagation:
   queue_final6.sh: (добор smol) → smol final → gate/quad k=1..3 и table-r k=1,2 на smol → gate/quad k=3 на 0.6b →
   1.7b howmany_other → идеи 4/6 → 0.6b howmany → Llama. Выступление упрощено (~200 слов).
 - 15:00 Маркеры на графиках: блоки ▲, MLP ■, внимание ●; обрезанные сверху точки — ★ (make_report.style, make_brief).
+- 16:20 По указанию пользователя все расчёты остановлены (queue_final6, sweep smol howmany_other, run.py). Кривые SmolLM2
+  64/66 (нет k=8 для B-window64s+routed25r и B-window64+topk25). Новые числа вписаны: results «Второе семейство»
+  (оракул 0.5…4.0 %, блок с массивными стоками 6.6…30.3 % = M-O4, окно+оракул со старым стоком 15.8 % при k=3),
+  brief стр. 3, слайд (пункт SmolLM2). Пересобрано: main 29 стр., brief 3, slide 1.
+  НЕ сделано (очередь остановлена): smol final (6 конфигураций k=8), предикторы gate/quad/table, 1.7b howmany_other,
+  идеи 4/6, 0.6b точки блока, Llama кривые. Для продолжения: nohup bash queue_final6.sh (ждёт отсутствия sweep smol).
