@@ -14,30 +14,28 @@
 \begin{document}
 \selectlanguage{russian}
 {\LARGE\bfseries Детерминированная замена первых слоёв LLM: что можно, что нельзя и почему}\\[0.1em]
-{\small\color{ink2} Qwen3-0.6B, Qwen3-1.7B и SmolLM2-1.7B. Замены первых $k$ слоёв строятся по явным формулам из весов и 128 тыс. токенов калибровки, без обучения и случайности. Калибровка: обучающая часть WikiText-103 (прямой прогон, без обучения); оценка: тест WikiText-2 и 7 бенчмарков.}
+{\small\color{ink2} Qwen3-0.6B, Qwen3-1.7B и MNN-Pocket-0.3B (архитектура Qwen3). Замены первых $k$ слоёв строятся по явным формулам из весов и 128 тыс. токенов калибровки, без обучения и случайности. Калибровка: обучающая часть WikiText-103 (прямой прогон, без обучения); оценка: тест WikiText-2 и 7 бенчмарков.}
 
-\vspace{0.1em}
-\begin{center}
-\includegraphics[width=0.52\linewidth]{figs/arch_A.pdf}
-\end{center}
-
-\vspace{0.2em}
+\vspace{0.3em}
 \noindent\begin{minipage}[t]{0.63\linewidth}
 \vspace{0pt}\centering
-\includegraphics[width=\linewidth,height=5.3cm,keepaspectratio]{fig_howmany_slide.pdf}\\[-0.1em]
-{\footnotesize\color{ink2} Рост perplexity на WikiText-2 от числа заменённых слоёв $k$ (пунктир "--- пороги 2 и 5\,\%).}
+\includegraphics[width=\linewidth,height=10.4cm,keepaspectratio]{fig_types_slide.pdf}\\[-0.1em]
+{\footnotesize\color{ink2} Рост perplexity на WikiText-2 от числа заменённых первых слоёв $k$ отдельно для внимания, MLP и блока;
+для MNN-Pocket-0.3B "--- KL с исходной моделью (её PPL ненадёжна). Сплошные линии и жирные подписи "--- наши методы,
+штриховые "--- методы из литературы, точки "--- пороги 2 и 5\,\%.}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.355\linewidth}
-\vspace{0pt}\small
+\vspace{0pt}\centering
+\includegraphics[width=\linewidth]{figs/arch_A.pdf}\par
+\vspace{0.4em}\raggedright\small
 \begin{itemize}
   \item \textbf{Внимание заменяется почти даром:} окно 64 + сток "--- \kTwoWin{} слоя при росте PPL $\le 2\,\%$,
     \kFiveWin{} слоёв при $\le 5\,\%$; бенчмарки без изменений, KV-кэш до \kvFiveWin{} меньше.
-  \item \textbf{MLP первых слоёв незаменим:} лучший предиктор 25\,\% нейронов стоит \dpplRoutedKThree{} (0.6B)
+  \item \textbf{MLP первых слоёв незаменим:} лучший \textbf{предиктор 25\,\% нейронов (M-O4)} стоит \dpplRoutedKThree{} (0.6B)
     и \dpplRoutedBKThree{} (1.7B) при $k=3$; поправки плотные и высокоранговые.
-  \item \textbf{Второе семейство (SmolLM2-1.7B):} сток привязан к токену «\,the\,» (нейрон 4987 слоя~1),
-    а не к позиции; защита нейронов стока: $123 \to 11\,\%$; окно с массивными ключами при $k=8$:
-    $64 \to 4.4\,\%$ без потерь на бенчмарках. MLP первых слоёв здесь дороже: оракул 25\,\% нейронов
-$\le 4\,\%$ до $k=8$, предиктор "--- 6\,\% уже при $k=1$.
+  \item \textbf{Табличное внимание первого слоя (MNN-Pocket-0.3B):} вес внимания пары токенов "--- сумма
+    32 косинусоид частот RoPE с амплитудами и фазами из \textbf{таблиц на токен}; точно (KL $\approx 0$),
+    в int8 и с окном на трёх локальных головах "--- KL $0.003$, таблицы 72~МБ.
 \end{itemize}
 
 \vspace{0.3em}

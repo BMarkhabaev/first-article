@@ -26,12 +26,13 @@ from make_report import INK, INK2, PAL  # noqa: E402,F401  (стиль rcParams 
 from sweep import CONFIGS, HOWMANY, HOWMANY_K  # noqa: E402
 
 OUT = ROOT.parent / "brief"
-MODELS = ["0.6b", "1.7b", "smol1.7b"]  # таблица (три столбца k) и макросы (0.6b/1.7b)
-KMAX_EXPECTED = {"0.6b": 12, "1.7b": 8, "smol1.7b": 8, "llama1b": 8}  # последний k развёртки; меньше — кривая не досчитана
-FIG_MODELS = ["0.6b", "1.7b", "smol1.7b", "llama1b"]  # панели рисунка (берутся те, у которых есть кривые)
-TITLE = {"0.6b": "Qwen3-0.6B", "1.7b": "Qwen3-1.7B", "smol1.7b": "SmolLM2-1.7B", "llama1b": "Llama-3.2-1B"}
+MODELS = ["0.6b", "1.7b", "pocket0.3b"]  # таблица (три столбца k) и макросы (0.6b/1.7b); всё — архитектура Qwen3
+KMAX_EXPECTED = {"0.6b": 12, "1.7b": 8, "pocket0.3b": 8}  # последний k развёртки; меньше — кривая не досчитана
+FIG_MODELS = ["0.6b", "1.7b", "pocket0.3b"]  # панели рисунка (берутся те, у которых есть кривые)
+TITLE = {"0.6b": "Qwen3-0.6B", "1.7b": "Qwen3-1.7B", "pocket0.3b": "MNN-Pocket-0.3B", "smol1.7b": "SmolLM2-1.7B", "llama1b": "Llama-3.2-1B"}
 CFG = {"0.6b": dict(L=28, d=1024, H=16, Hkv=8, D=128, I=3072, V=151936),
        "1.7b": dict(L=28, d=2048, H=16, Hkv=8, D=128, I=6144, V=151936),
+       "pocket0.3b": dict(L=28, d=896, H=14, Hkv=2, D=64, I=2560, V=65536),
        "smol1.7b": dict(L=24, d=2048, H=32, Hkv=32, D=64, I=8192, V=49152),
        "llama1b": dict(L=16, d=2048, H=32, Hkv=8, D=64, I=8192, V=128256),
        "4b": dict(L=36, d=2560, H=32, Hkv=8, D=128, I=9728, V=151936),
@@ -207,7 +208,7 @@ def main():
     (OUT / "brief_numbers.tex").write_text("\n".join(mac) + "\n", encoding="utf-8")
     # таблица
     lines = [r"\begin{tabular}{llcccc}", r"\toprule",
-             r"Метод & Что заменено & \multicolumn{2}{c}{Сколько слоёв $k$: Qwen3-0.6B / 1.7B / SmolLM2} & "
+             r"Метод & Что заменено & \multicolumn{2}{c}{Сколько слоёв $k$: Qwen3-0.6B / 1.7B / MNN-Pocket-0.3B} & "
              r"\multicolumn{2}{c}{Экономия умножений (0.6B)} \\",
              r" & & при $\Delta$PPL$\le$2\% & при $\Delta$PPL$\le$5\% & при $k_{2\%}$ & при $k_{5\%}$ \\",
              r" & & & & \scriptsize $T{=}2048$ / $8192$ & \scriptsize $T{=}2048$ / $8192$ \\", r"\midrule"]
@@ -215,7 +216,7 @@ def main():
         lab = (r"\textbf{" + label + "}") if ours else label
         k2, k5 = k["0.6b"]
         kb2, kb5 = k["1.7b"]
-        ks2, ks5 = k["smol1.7b"]
+        ks2, ks5 = k["pocket0.3b"]
         cell = lambda v: "…" if v is None else dash(v)  # None — конфигурация ещё не считалась; 0 — порог не выполнен
         c2 = " / ".join(cell(v) for v in (k2, kb2, ks2))
         c5 = " / ".join(cell(v) for v in (k5, kb5, ks5))
@@ -263,8 +264,12 @@ def main():
       axes[0].set_ylabel("рост PPL, %", fontsize=8 * fs)
       fig.supxlabel("k — число заменённых первых слоёв", fontsize=8 * fs, color=INK)
       h, l = axes[0].get_legend_handles_labels()
-      fig.legend(h, l, fontsize=6.3 * fs, ncol=4, loc="upper center", bbox_to_anchor=(0.5, 0.0), frameon=False,
-                 handlelength=2.2, columnspacing=1.2)
+      leg = fig.legend(h, l, fontsize=6.3 * fs, ncol=4, loc="upper center", bbox_to_anchor=(0.5, 0.0), frameon=False,
+                       handlelength=2.2, columnspacing=1.2)
+      ours_labels = {v[1].replace("\\%", "%") for v in SHOW_FIG.values() if v[2]}
+      for t in leg.get_texts():  # наши методы — жирным
+          if t.get_text() in ours_labels:
+              t.set_fontweight("bold")
       fig.tight_layout()
       fig.savefig(OUT / fname)
       plt.close(fig)
@@ -273,5 +278,106 @@ def main():
     print(info_b)
 
 
+
+# рисунок для слайда: строки — модели, столбцы — тип замены. Цвет блока = цвет его MLP-части.
+TYPE_PANELS = [  # в легенде: сначала наши, потом литература; сняты M-O1 (вдвое–впятеро хуже M-O4) и методы с ростом PPL > 20 % при k=3 у 0.6B (O1, A3)
+    ("Внимание", ["L1-window64s", "O5-windowtail16", "L1-window64", "L2-strided"]),
+    ("MLP", ["MO4-routed25r", "ML2-topk25-dejavu-oracle", "ML8-cats50", "ML1-a3mlp50r", "ML5-svdllm50"]),
+    ("Блок (внимание + MLP)", ["B-window64+routed25r", "B-window64+topk25", "B-window64+svdllm"]),
+]
+TYPE_SHOW = dict(SHOW, **{  # (подпись, короткая подпись, наш?, макро-суффикс) — только для рисунка слайда
+    "B-window64+topk25": ("Окно 64 + сток + отбор 25\\% по активациям", "окно 64 + отбор 25\\% по активациям",
+                          False, "WinOracle"),
+    "O5-windowtail16": ("O5: окно 16 + хвост", "O5: окно 16 + хвост", True, "WinTail"),
+    "L2-strided": ("Strided (окно 32 + каждый 32-й)", "strided: окно 32 + каждый 32-й", False, "Strided"),
+    "L6-a3-attn": ("A3 (внимание)", "A3 (внимание)", False, "AthreeAttn"),
+    "MO1-ridge-keep25r": ("M-O1: линейный MLP + 25\\% нейронов", "M-O1: линейный + 25\\% нейронов", True, "Ridge"),
+    "ML8-cats50": ("CATS, 50\\%", "CATS 50\\%", False, "Cats"),
+    "ML1-a3mlp50r": ("A3 FFN, 50\\%", "A3 FFN 50\\%", False, "AthreeMlp"),
+    "B-window64+ridge-keep25r": ("Окно 64 + сток + M-O1", "окно 64 + сток + M-O1", True, "WinRidge"),
+    "L6-a3-full": ("A3 (весь блок)", "A3 (весь блок)", False, "AthreeFull"),
+})
+TYPE_COLORS = {"L1-window64": PAL[0], "L1-window64s": PAL[2], "O1-headtyped50": PAL[1], "O5-windowtail16": PAL[6],
+               "L2-strided": PAL[5], "L6-a3-attn": PAL[7],
+               "ML2-topk25-dejavu-oracle": PAL[3], "MO4-routed25r": PAL[4], "ML5-svdllm50": PAL[5],
+               "MO1-ridge-keep25r": PAL[6], "ML8-cats50": PAL[0], "ML1-a3mlp50r": PAL[7],
+               # цвет блока = цвет его MLP-части; A3 — красный во всех столбцах
+               "B-window64+topk25": PAL[3], "B-window64+routed25r": PAL[4], "B-window64+svdllm": PAL[5],
+               "B-window64+ridge-keep25r": PAL[6], "L6-a3-full": PAL[7]}
+KL_MODELS = {"pocket0.3b"}  # PPL исходной модели ~1170 и рост PPL немонотонен: строка рисуется по KL
+
+
+def fig_types(out_name="fig_types_slide.pdf", models=("0.6b", "1.7b", "pocket0.3b"), fs=1.25, row_h=2.0):
+    from matplotlib.lines import Line2D
+    from matplotlib.ticker import FixedLocator, FuncFormatter, NullLocator
+    names = [n for _, ns in TYPE_PANELS for n in ns]
+    curves = {m: load_curves(m, names) for m in models}
+    rows = [m for m in models if curves[m] and max(len(v) for v in curves[m].values()) >= 2]
+    YTOP = 130.0
+    mk = {"Внимание": "o", "MLP": "s", "Блок (внимание + MLP)": "^"}
+
+    def style(n, title):
+        _, short, ours, _ = TYPE_SHOW[n]
+        st = dict(color=TYPE_COLORS[n], ls="-" if ours else "--", marker=mk[title], ms=3.6 * fs, lw=1.6,
+                  label=short.replace("\\%", "%"))
+        if n == "L1-window64s":  # на Qwen3 совпадает с окном 64: толстая полупрозрачная линия под пунктиром
+            st.update(lw=3.2, alpha=0.55, ms=5.0 * fs, zorder=1.8)
+        return st
+
+    fig, axes = plt.subplots(len(rows), 3, figsize=(10.5, row_h * len(rows) + 0.9), sharey="row", squeeze=False)
+    for r, m in enumerate(rows):
+        kl = m in KL_MODELS
+        kmx = max(p[0] for v in curves[m].values() for p in v)
+        ks_all = [k for k in HOWMANY_K if k <= kmx]
+        for c, (title, ns) in enumerate(TYPE_PANELS):
+            ax = axes[r][c]
+            for n in ns:
+                if n not in curves[m]:
+                    continue
+                pts = curves[m][n]
+                ys = [p[2] if kl else 100 * max(p[1], 1e-3) for p in pts]
+                top = 10 ** 9 if kl else YTOP
+                ax.plot([p[0] for p in pts], [min(y, top) for y in ys], **style(n, title))
+                clipped = [(p[0], y) for p, y in zip(pts, ys) if y > top]
+                if clipped:
+                    ax.scatter([q[0] for q in clipped], [top] * len(clipped), marker="*", s=28 * fs,
+                               color=TYPE_COLORS[n], zorder=4)
+            ax.set_yscale("log")
+            if kl:
+                ax.set_ylim(0.008, 2.6)
+                ticks = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2]
+            else:
+                for th in (2, 5):
+                    ax.plot([0.6, ks_all[-1] + 0.25], [th, th], color=INK2, lw=1.0, ls=":", zorder=1)
+                    ax.text(ks_all[-1] + 0.45, th, f"{th}%", va="center", ha="left", fontsize=7 * fs, color=INK,
+                            fontweight="bold")
+                ax.set_ylim(0.08, YTOP * 1.3)
+                ticks = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100]
+            ax.yaxis.set_major_locator(FixedLocator(ticks))
+            ax.yaxis.set_minor_locator(NullLocator())
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+            ax.set_xticks(ks_all)
+            ax.set_xlim(0.6, ks_all[-1] + 1.4)
+            ax.tick_params(labelsize=7 * fs)
+            if r == 0:
+                ax.set_title(title, fontsize=9.5 * fs, color=INK, fontweight="bold")
+            if c == 0:
+                ax.set_ylabel(f"{TITLE[m]}\n" + ("KL с исходной" if kl else "рост PPL, %"), fontsize=8 * fs)
+    for c, (title, ns) in enumerate(TYPE_PANELS):  # легенда столбца — все его линии, наши жирным
+        shown = [n for n in ns if any(n in curves[m] for m in rows)]
+        hs = [Line2D([], [], **style(n, title)) for n in shown]
+        leg = axes[-1][c].legend(handles=hs, fontsize=6.4 * fs, loc="upper center", bbox_to_anchor=(0.5, -0.2),
+                                 frameon=False, ncol=1, handlelength=2.2, labelspacing=0.25)
+        for t, n in zip(leg.get_texts(), shown):
+            if TYPE_SHOW[n][2]:
+                t.set_fontweight("bold")
+    fig.supxlabel("k — число заменённых первых слоёв", fontsize=8 * fs, color=INK, y=0.0)
+    fig.tight_layout()
+    fig.savefig(OUT / out_name)
+    plt.close(fig)
+    return rows
+
+
 if __name__ == "__main__":
     main()
+    print("рисунок по типам замен, строки:", fig_types())

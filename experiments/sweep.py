@@ -156,7 +156,20 @@ HOWMANY = {
                                                     "mlp": {"active_ratio": 0.25, "predictor": "linear", "robust_tau": 10}}),
     "B-window64+topk25": ("sparse+topk_mlp", {"attn": {"window": 64},
                                              "mlp": {"ratio": 0.25, "protect_sinks": False}}),  # диагностика: окно + оракул
+    # 2026-11-14: больше алгоритмов на кривых слайда (по типу замены), см. HOWMANY_MORE
+    "L2-strided": ("strided", {"window": 32, "stride": 32}),
+    "O5-windowtail16": ("window_tail", {"window": 16}),
+    "L6-a3-attn": ("a3", {"mlp": False}),
+    "L6-a3-full": ("a3", {}),
+    "ML1-a3mlp50r": ("a3_mlp", {"ratio": 0.5, "robust_tau": 10}),
+    "ML8-cats50": ("cats_mlp", {"ratio": 0.5}),
+    "MO1-ridge-keep25r": ("ridge_mlp", {"keep_ratio": 0.25, "robust_tau": 10}),
+    "B-window64+ridge-keep25r": ("sparse+ridge_mlp", {"attn": {"window": 64},
+                                                      "mlp": {"keep_ratio": 0.25, "robust_tau": 10}}),
 }
+# порядок: сначала быстрые (≈1–2 мин на прогон у 0.6B), в конце A3-блок и линейный MLP (последовательная калибровка)
+HOWMANY_MORE = ["L2-strided", "ML8-cats50", "ML1-a3mlp50r", "O5-windowtail16"]  # A3 сняты: >20 % при k=3 у 0.6B
+HOWMANY_MORE_SLOW = ["MO1-ridge-keep25r", "B-window64+ridge-keep25r"]  # снято с очереди 2026-11-14 (M-O1 хуже M-O4)
 ROBUST_HOWMANY = ["MO4-routed25r", "B-window64+routed25r"]
 ROBUST_FINAL = ["MO4-routed25r", "B-window+MO4-25r", "MO1-ridge-keep25r"]
 EXTRAS = [("ML1-a3mlp50r", False), ("L6-a3-full-r", True)]
@@ -326,6 +339,19 @@ def stage_howmany_other(args):
                 run(m, name, method, params, k, RESULTS / m / "howmany" / f"{name}_k{k}.json", False, args)
 
 
+def stage_howmany_more(args, names=None):
+    """Дополнительные алгоритмы на кривых «сколько слоёв» (k = 1..8) для всех заданных моделей."""
+    for m in args.models:
+        for name in names or HOWMANY_MORE:
+            for k in HOWMANY_OTHER_K:
+                method, params = HOWMANY[name]
+                run(m, name, method, params, k, RESULTS / m / "howmany" / f"{name}_k{k}.json", False, args)
+
+
+def stage_howmany_more_slow(args):
+    stage_howmany_more(args, HOWMANY_MORE_SLOW)
+
+
 def stage_bench1000(args):
     """Главные столбцы с бенчами на большой подвыборке (results/<model>/bench1000/)."""
     extra = ["--limit", str(BENCH_LIMIT), "--mmlu-limit", str(BENCH_MMLU_LIMIT)]
@@ -403,7 +429,7 @@ def stage_distill(args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", default="all", choices=["profile", "ksweep", "pareto", "final", "distill", "howmany",
-                                                       "howmany_other", "bench1000", "robust", "extras", "ideas", "novelty", "all"])
+                                                       "howmany_other", "howmany_more", "howmany_more_slow", "bench1000", "robust", "extras", "ideas", "novelty", "all"])
     ap.add_argument("--models", default=",".join(MODELS))
     ap.add_argument("--calib-tokens", type=int, default=262_144)
     ap.add_argument("--eval-windows", type=int, default=0, help="0 = весь WikiText-2 test")

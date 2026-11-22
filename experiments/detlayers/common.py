@@ -20,6 +20,7 @@ MODELS = {
     "8b": "Qwen/Qwen3-8B-Base",
     "14b": "Qwen/Qwen3-14B-Base",
     "32b": "Qwen/Qwen3-32B",  # Base-варианта 32B не выпущено — пост-обученная модель (та же архитектура)
+    "pocket0.3b": "taobao-mnn/MNN-Pocket-0.3B",  # архитектура Qwen3: d=896, 14/2 головы, head_dim 64, MLP 2560
     # второе семейство (архитектура Llama: без QK-norm, MHA/GQA, SwiGLU)
     "smol1.7b": "HuggingFaceTB/SmolLM2-1.7B",
     "llama1b": "meta-llama/Llama-3.2-1B",
@@ -36,8 +37,9 @@ def resolve_model(model: str) -> str:
         return model
     repo = MODELS[key].split("/")[1]
     for cand in {repo, repo.replace("-Base", ""), repo + "-Base"}:
-        if (Path(MODELS_DIR) / cand / "config.json").exists():
-            return str(Path(MODELS_DIR) / cand)
+        for base in (Path(MODELS_DIR), DATA_DIR / "models"):  # data/models — локальные копии (не в git)
+            if (base / cand / "config.json").exists():
+                return str(base / cand)
     return MODELS[key]
 
 

@@ -59,7 +59,7 @@ LABEL = {
     "L6-a3-full-r": "A3 (блок, робастн.)",
 }
 # столбцы итоговой таблицы статьи (не совпадают с FINAL_MAIN прогона: добавлены робастные варианты)
-TABLE_MAIN = ["orig", "L1-window64", "L1-window64s", "L5-relpos", "L6-a3-full", "ML5-svdllm50", "B-window+svdllm",
+TABLE_MAIN = ["orig", "L1-window64", "L5-relpos", "L6-a3-full", "ML5-svdllm50", "B-window+svdllm",
               "O1-headtyped50", "MO4-routed25", "MO4-routed25r", "B-window+MO4-25r"]
 SHORT = {  # короткие заголовки столбцов таблицы
     "orig": "Исх.", "L1-window64": "Окно", "L1-window64s": "Окно$_m$", "L5-relpos": "Поз.", "L6-a3-full": "A3",
